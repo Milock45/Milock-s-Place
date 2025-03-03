@@ -1,0 +1,183 @@
+Google Data Analysis Capstone Project Case 1
+
+All R code for my analysis is below.
+
+BEGIN----------------------------------
+
+# Set the working directory
+setwd("C:/Users/owner/Desktop/trip_data_2024")
+
+# Install the necessary packages
+install.packages(tidyverse)
+library(tidyverse)
+library(conflicted)
+
+# Prepare the system for possible conflicts between packages
+conflict_prefer("filter","dplyr")
+conflict_prefer("lag","dplyr")
+
+# Import the data
+jan <- read.csv("202401-divvy-tripdata.csv")
+feb <- read.csv("202402-divvy-tripdata.csv")
+mar <- read.csv("202403-divvy-tripdata.csv")
+apr <- read.csv("202404-divvy-tripdata.csv")
+may <- read.csv("202405-divvy-tripdata.csv")
+jun <- read.csv("202406-divvy-tripdata.csv")
+jul <- read.csv("202407-divvy-tripdata.csv")
+aug <- read.csv("202408-divvy-tripdata.csv")
+sep <- read.csv("202409-divvy-tripdata.csv")
+oct <- read.csv("202410-divvy-tripdata.csv")
+nov <- read.csv("202411-divvy-tripdata.csv")
+dec <- read.csv("202412-divvy-tripdata.csv")
+
+# Combine all the months into one database
+data_2024 <- rbind(jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec)
+
+# Check for duplicate ride ids
+uniquerides <- table(data_2024$ride_id)
+
+# Extract a duplicate ride id to check if the whole observation is identical
+dupe <- data_2024[data_2024$ride_id == '011C8EF97AB0F30D', ]
+
+# Remove the duplicates
+data_2024_no_dupe <- data_2024[!duplicated(data_2024$ride_id),]
+print(paste("Removed", nrow(data_2024) - nrow(data_2024_no_dupe), "duplicated rows"))
+
+# Trim off the data I don’t believe I need.
+df_2024_trim <- select(data_2024_trim, rideable_type, started_at, ended_at, start_station_id, end_station_id, member_casual)
+
+# Add a column that contains the length of time for each ride in seconds.
+df_2024_trim$time_diff <- difftime(df_2024_trim$ended_at, df_2024_trim$started_at, units = "secs")
+
+# Arrange the data by time_diff descending and ascending to spot extreme data points.
+df_2024_desc <- df_2024_trim %>% arrange(desc(time_diff))
+df_2024_asc <- df_2024_trim %>% arrange(time_diff)
+
+# Separate the data by casual and member to see the differences in anomaly rides between them.
+d_member <- filter(df_2024_trim, member_casual == "member")
+d_casual <- filter(df_2024_trim, member_casual == "casual")
+
+# Sort the time for each trip for casual and member in descending and ascending order:
+d_casual_desc <- d_casual %>% arrange(desc(time_diff))
+d_member_desc <- d_member %>% arrange(desc(time_diff))
+d_casual_asc <- d_casual %>% arrange(time_diff)
+d_member_asc <- d_member %>% arrange(time_diff)
+
+# Remove unusual rides of negative time and rides that hit the cutoff of 90,000 seconds.
+df_2024_clean <- filter(df_2024_trim, time_diff > 0 & time_diff < 89940)
+
+# Reformat the date and time sections to be easier to read.
+df_2024_clean$date <- as.Date(df_2024_clean$started_at)
+df_2024_clean$month <- format(as.Date(df_2024_clean$date), "%m")
+df_2024_clean$day <- format(as.Date(df_2024_clean$date), "%d")
+df_2024_clean$year <- format(as.Date(df_2024_clean$date), "%Y")
+df_2024_clean$day_of_week <- format(as.Date(df_2024_clean$date), "%A")
+
+# Check that the time_diff column is the correct data type. It should return "TRUE."
+is.factor(df_2024_clean$time_diff)
+df_2024_clean$time_diff <- as.numeric(as.character(df_2024_clean$time_diff))
+is.numeric(df_2024_clean$time_diff)
+
+# Rename df_2024_clean to something easier. Because.
+all <- select(df_2024_clean, rideable_type, started_at, ended_at, start_station_id, end_station_id, member_casual, time_diff, date, month, day, year, day_of_week)
+
+#The below aggregations are from the suggested worksheet
+mean(all$time_diff)
+median(all$time_diff)
+max(all$time_diff)
+min(all$time_diff)
+summary(all$time_diff)
+mem_cas_mean <- aggregate(all$time_diff ~ all$member_casual, FUN = mean)
+mem_cas_median <- aggregate(all$time_diff ~ all$member_casual, FUN = median)
+mem_cas_max <- aggregate(all$time_diff ~ all$member_casual, FUN = max)
+mem_cas_min <- aggregate(all$time_diff ~ all$member_casual, FUN = min)
+
+#Aggregate data. The below aggregations are from the suggested worksheet
+mean(all$time_diff)
+median(all$time_diff)
+max(all$time_diff)
+min(all$time_diff)
+summary(all$time_diff)
+mem_cas_mean <- aggregate(all$time_diff ~ all$member_casual, FUN = mean)
+mem_cas_median <- aggregate(all$time_diff ~ all$member_casual, FUN = median)
+mem_cas_max <- aggregate(all$time_diff ~ all$member_casual, FUN = max)
+mem_cas_min <- aggregate(all$time_diff ~ all$member_casual, FUN = min)
+
+# Aggregate the mean of all member and casual rides per day of the week.
+mem_cas_dailymean <- aggregate(all$time_diff ~ all$member_casual + all$day_of_week, FUN = mean)
+
+# Sum up the total rides per day of week for members and casuals
+m_c_ride_daily <- table(all$day_of_week, all$member_casual)
+
+# Export the above two data frames
+write.csv(m_c_ride_daily, file = "m_c_ride_daily.csv")
+write.csv(mem_cas_dailymean, file = "mem_cas_dailymean.csv")
+
+# Throw the number of rides into the average ride time data.
+mem_cas_complete <- all %>%
+ mutate(weekday = wday(started_at, label= TRUE)) %>%
+ group_by(member_casual, weekday) %>%
+ summarise(number_of_rides = n()
+ ,average_duration = mean(time_diff)) %>%
+ arrange(member_casual, weekday)
+
+# Export the .csv
+write.csv(mem_cas_dailymean, file = "mem_cas_complete.csv")
+
+# Create a df for export with month and ride totals.
+total_rides_monthly <- data.frame(x=c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+  , y=c(table(all$month)[1], table(all$month)[2], table(all$month)[3], table(all$month)[4], table(all$month)[5], table(all$month)[6]
+  , table(all$month)[7], table(all$month)[8], table(all$month)[9], table(all$month)[10], table(all$month)[11], table(all$month)[12]))
+
+# Export to .csv
+write.csv(total_rides_monthly, file = "total_rides_monthly.csv")
+
+# Create a df with totals for all months separating members and casuals.
+m_c_total_monthly <- data.frame(Month=c("January", "February", "March", "April", "May", "June", "July"
+   , "August", "September", "October", "November", "December")
+   , Members=c(table(all$month, all$member_casual)[1,2]
+   , table(all$month, all$member_casual)[2,2], table(all$month, all$member_casual)[3,2]
+   , table(all$month, all$member_casual)[4,2], table(all$month, all$member_casual)[5,2]
+   , table(all$month, all$member_casual)[6,2], table(all$month, all$member_casual)[7,2]
+   , table(all$month, all$member_casual)[8,2], table(all$month, all$member_casual)[9,2]
+   , table(all$month, all$member_casual)[10,2], table(all$month, all$member_casual)[11,2]
+   , table(all$month, all$member_casual)[12,2])
+   , Casuals=c(table(all$month, all$member_casual)[1,1], table(all$month, all$member_casual)[2,1]
+   , table(all$month, all$member_casual)[3,1], table(all$month, all$member_casual)[4,1]
+   , table(all$month, all$member_casual)[5,1], table(all$month, all$member_casual)[6,1]
+   , table(all$month, all$member_casual)[7,1], table(all$month, all$member_casual)[8,1]
+   , table(all$month, all$member_casual)[9,1], table(all$month, all$member_casual)[10,1]
+   , table(all$month, all$member_casual)[11,1], table(all$month, all$member_casual)[12,1]))
+
+# Export to .csv
+write.csv(m_c_total_monthly, file = "m_c_total_monthly.csv")
+
+# Parsing date and time into columns.
+all$started_at <- as.POSIXct(all$started_at, "Y-%m-%d %H:%M:%S")
+
+# Add a column called "hour" with just the hour of day in it.
+all$hour <- as.numeric(format(all$started_at, "%H"))
+
+# Tally all the rides in each hour.
+hours <- table(all$hour + 1)
+
+# Export to .csv.
+write.csv(hours, file = "hours.csv")
+
+# Tally just the rides in each hour for members and casuals
+mem_cas_hours <- table(all$hour +1, all$member_casual)
+
+# Export csv.
+write.csv(mem_cas_hours, file = "mem_cas_hours.csv")
+
+# Separate rides by bike type
+rides_by_bike_type <- table(all$rideable_type)
+
+# Separate rides by bike type between members and casuals.
+rides_by_bike_type_mem_cas <- table(all$rideable_type, all$member_casual)
+
+# Export csv
+write.csv(rides_by_bike_type, file = "rides_by_bike_type.csv")
+write.csv(rides_by_bike_type_mem_cas, file = "rides_by_bike_type_mem_cas.csv")
+
+----------------------------------END
