@@ -4,19 +4,19 @@ All R code for my analysis is below.
 
 BEGIN----------------------------------
 
-# Set the working directory
+# Set the working directory (For R Studio Desktop)
 setwd("C:/Users/owner/Desktop/trip_data_2024")
 
-# Install the necessary packages
+# Install the necessary packages (For R Studio Desktop)
 install.packages(tidyverse)
 library(tidyverse)
 library(conflicted)
 
-# Prepare the system for possible conflicts between packages
+# Prepare the system for possible conflicts between packages (R Studio Desktop)
 conflict_prefer("filter","dplyr")
 conflict_prefer("lag","dplyr")
 
-# Import the data (This code will work in R Studio Desktop)
+# Import the data (R Studio Desktop)
 jan <- read.csv("202401-divvy-tripdata.csv")
 feb <- read.csv("202402-divvy-tripdata.csv")
 mar <- read.csv("202403-divvy-tripdata.csv")
@@ -31,18 +31,18 @@ nov <- read.csv("202411-divvy-tripdata.csv")
 dec <- read.csv("202412-divvy-tripdata.csv")
 
 # Import the data (This code is ONLY for the Kaggle Website)
-janpath = "/kaggle/input/cyclistic-bikesharing-data-2024/202401-divvy-tripdata.csv"
-febpath = "/kaggle/input/cyclistic-bikesharing-data-2024/202402-divvy-tripdata.csv"
-marpath = "/kaggle/input/cyclistic-bikesharing-data-2024/202403-divvy-tripdata.csv"
-aprpath = "/kaggle/input/cyclistic-bikesharing-data-2024/202404-divvy-tripdata.csv"
-maypath = "/kaggle/input/cyclistic-bikesharing-data-2024/202405-divvy-tripdata.csv"
-junpath = "/kaggle/input/cyclistic-bikesharing-data-2024/202406-divvy-tripdata.csv"
-julpath = "/kaggle/input/cyclistic-bikesharing-data-2024/202407-divvy-tripdata.csv"
-augpath = "/kaggle/input/cyclistic-bikesharing-data-2024/202408-divvy-tripdata.csv"
-seppath = "/kaggle/input/cyclistic-bikesharing-data-2024/202409-divvy-tripdata.csv"
-octpath = "/kaggle/input/cyclistic-bikesharing-data-2024/202410-divvy-tripdata.csv"
-novpath = "/kaggle/input/cyclistic-bikesharing-data-2024/202411-divvy-tripdata.csv"
-decpath = "/kaggle/input/cyclistic-bikesharing-data-2024/202412-divvy-tripdata.csv"
+janpath = "/kaggle/input/cyclistics-bikesharing-data-2024/202401-divvy-tripdata.csv"
+febpath = "/kaggle/input/cyclistics-bikesharing-data-2024/202402-divvy-tripdata.csv"
+marpath = "/kaggle/input/cyclistics-bikesharing-data-2024/202403-divvy-tripdata.csv"
+aprpath = "/kaggle/input/cyclistics-bikesharing-data-2024/202404-divvy-tripdata.csv"
+maypath = "/kaggle/input/cyclistics-bikesharing-data-2024/202405-divvy-tripdata.csv"
+junpath = "/kaggle/input/cyclistics-bikesharing-data-2024/202406-divvy-tripdata.csv"
+julpath = "/kaggle/input/cyclistics-bikesharing-data-2024/202407-divvy-tripdata.csv"
+augpath = "/kaggle/input/cyclistics-bikesharing-data-2024/202408-divvy-tripdata.csv"
+seppath = "/kaggle/input/cyclistics-bikesharing-data-2024/202409-divvy-tripdata.csv"
+octpath = "/kaggle/input/cyclistics-bikesharing-data-2024/202410-divvy-tripdata.csv"
+novpath = "/kaggle/input/cyclistics-bikesharing-data-2024/202411-divvy-tripdata.csv"
+decpath = "/kaggle/input/cyclistics-bikesharing-data-2024/202412-divvy-tripdata.csv"
 jan <- read.csv(janpath)
 feb <- read.csv(febpath)
 mar <- read.csv(marpath)
