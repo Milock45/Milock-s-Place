@@ -70,7 +70,7 @@ data_2024_no_dupe <- data_2024[!duplicated(data_2024$ride_id),]
 print(paste("Removed", nrow(data_2024) - nrow(data_2024_no_dupe), "duplicated rows"))
 
 # Trim off the data I don’t believe I need.
-df_2024_trim <- select(data_2024_trim, rideable_type, started_at, ended_at, start_station_id, end_station_id, member_casual)
+df_2024_trim <- select(data_2024_no_dupe, rideable_type, started_at, ended_at, start_station_id, end_station_id, member_casual)
 
 # Add a column that contains the length of time for each ride in seconds.
 df_2024_trim$time_diff <- difftime(df_2024_trim$ended_at, df_2024_trim$started_at, units = "secs")
